@@ -1,6 +1,6 @@
 // Post-match flow: after an online game ends, both players return to the deck builder (still connected) and ready up again for a second match.
 const { chromium } = require('playwright-core');
-const URL = 'http://localhost:8077/index.html?server=ws://localhost:8765';
+const URL = 'http://localhost:8077/index.html';
 
 let failed = false;
 const errors = { A: [], B: [] };
@@ -8,6 +8,13 @@ function assert(cond, label) { console.log((cond ? 'PASS ' : 'FAIL ') + label); 
 async function waitFor(page, fn, label, timeout = 60000) {
 	try { await page.waitForFunction(fn, null, { timeout }); return true; }
 	catch (e) { console.log('FAIL (timeout) ' + label); failed = true; return false; }
+}
+
+async function launchBrowser() {
+	for (const opts of [{ channel: 'chrome' }, { channel: 'msedge' }, {}]) {
+		try { return await chromium.launch(opts); } catch (_) {}
+	}
+	return await chromium.launch();
 }
 
 async function passOutGame(pages) {
@@ -28,7 +35,7 @@ async function passOutGame(pages) {
 }
 
 (async () => {
-	const browser = await chromium.launch();
+	const browser = await launchBrowser();
 	const A = await (await browser.newContext()).newPage();
 	const B = await (await browser.newContext()).newPage();
 	for (const [tag, page] of [['A', A], ['B', B]]) {

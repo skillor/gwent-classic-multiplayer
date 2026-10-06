@@ -1,7 +1,7 @@
 "use strict"
 
 // Pre-game menu and online lobby. Shows the mode choice (Vs Computer /
-// Vs Player) on startup, handles room create/join against the relay server,
+// Vs Player) on startup, handles room create/join via PeerJS (WebRTC),
 // and runs the ready-up phase in the deck builder before handing the match
 // off to the multiplayer session (mp in netplay.js).
 //

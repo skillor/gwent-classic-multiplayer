@@ -1,11 +1,18 @@
-// End-to-end multiplayer test: two headless browser pages connect through the
-// relay server, ready up, and play a full online match (one real card play +
+// End-to-end multiplayer test: two headless browser pages connect peer-to-peer
+// via PeerJS, ready up, and play a full online match (one real card play +
 // passes) to the end screen. Lockstep checksums run after every turn, so any
 // state divergence fails the test via the desync popup.
 const { chromium } = require('playwright-core');
 
-const URL = 'http://localhost:8077/index.html?server=ws://localhost:8765';
+const URL = 'http://localhost:8077/index.html';
 const errors = { A: [], B: [] };
+
+async function launchBrowser() {
+	for (const opts of [{ channel: 'chrome' }, { channel: 'msedge' }, {}]) {
+		try { return await chromium.launch(opts); } catch (_) {}
+	}
+	return await chromium.launch();
+}
 
 function watch(page, tag) {
 	page.on('pageerror', e => {
@@ -39,7 +46,7 @@ async function waitFor(page, fn, label, timeout = 30000) {
 }
 
 (async () => {
-	const browser = await chromium.launch();
+	const browser = await launchBrowser();
 	const A = await (await browser.newContext()).newPage(); // host
 	const B = await (await browser.newContext()).newPage(); // guest
 	watch(A, 'A'); watch(B, 'B');

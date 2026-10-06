@@ -13,8 +13,15 @@ async function waitFor(page, fn, label, timeout = 30000) {
 	catch (e) { console.log('FAIL (timeout) ' + label); failed = true; return false; }
 }
 
+async function launchBrowser() {
+	for (const opts of [{ channel: 'chrome' }, { channel: 'msedge' }, {}]) {
+		try { return await chromium.launch(opts); } catch (_) {}
+	}
+	return await chromium.launch();
+}
+
 (async () => {
-	const browser = await chromium.launch();
+	const browser = await launchBrowser();
 	const page = await browser.newPage();
 	page.on('pageerror', e => {
 		const msg = String(e);

@@ -4,8 +4,15 @@
 // and that a quickmatch pairing starts an actual match.
 const { chromium } = require('playwright-core');
 
-const URL = 'http://localhost:8077/index.html?server=ws://localhost:8765';
+const URL = 'http://localhost:8077/index.html';
 const errors = { A: [], B: [], C: [] };
+
+async function launchBrowser() {
+	for (const opts of [{ channel: 'chrome' }, { channel: 'msedge' }, {}]) {
+		try { return await chromium.launch(opts); } catch (_) {}
+	}
+	return await chromium.launch();
+}
 
 function watch(page, tag) {
 	page.on('pageerror', e => {
@@ -39,7 +46,7 @@ async function waitFor(page, fn, label, timeout = 30000) {
 }
 
 (async () => {
-	const browser = await chromium.launch();
+	const browser = await launchBrowser();
 	const newPage = async tag => {
 		const p = await (await browser.newContext()).newPage();
 		watch(p, tag);
